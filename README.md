@@ -1,106 +1,68 @@
+<div align="center">
+
 # 🧬 BioGenesis
 
-**A persistent, evidence-aware multi-agent biomedical research assistant.**
+### A persistent, evidence-aware multi-agent biomedical research assistant
 
-BioGenesis takes a research question, retrieves relevant PubMed literature, extracts and scores structured evidence, builds a knowledge graph, and orchestrates three collaborating LLM agents — **Planner → Hypothesis Generator → Scientific Critic** — to produce hypotheses that are grounded in cited evidence, adversarially reviewed, and persisted across sessions in a local memory store.
+*Retrieves literature → extracts and scores evidence → builds a knowledge graph → generates and adversarially critiques hypotheses — with every design choice built to be measured, not just demoed.*
 
-It is built as a **research artifact**: every architectural choice is there to be ablated and measured, not just to work.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/tests-65%20passing-2ea44f)](#-testing)
+[![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+[![Cost](https://img.shields.io/badge/cost-%240-success)](#-why-0-cost)
+[![Status](https://img.shields.io/badge/status-benchmark%20in%20progress-yellow)](#-experimental-status)
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/tests-65%20passing-brightgreen)](#-testing)
-[![Cost](https://img.shields.io/badge/cost-%240%20(free%20tiers%20only)-success)](#-why-0-cost)
-[![Status](https://img.shields.io/badge/status-research%20in%20progress-yellow)](#-experimental-status)
-[![License](https://img.shields.io/badge/license-MIT-lightgrey)](#-license)
+[Overview](#-overview) • [Architecture](#-architecture) • [Quickstart](#-quickstart) • [Research Framework](#-research-framework) • [Results](#-experimental-status) • [Limitations](#-known-limitations)
 
----
-
-## Table of Contents
-
-- [Why BioGenesis](#-why-biogenesis)
-- [Architecture](#-architecture)
-- [Repository Layout](#-repository-layout)
-- [Getting Started](#-getting-started)
-- [Running the Full System](#-running-the-full-system)
-- [Testing](#-testing)
-- [Research Framework](#-research-framework)
-- [Experimental Status](#-experimental-status)
-- [Known Limitations](#-known-limitations)
-- [Roadmap](#-roadmap)
-- [Why $0 Cost](#-why-0-cost)
-- [Citation](#-citation)
-- [License](#-license)
+</div>
 
 ---
 
-## 🔍 Why BioGenesis
+## 📌 TL;DR
 
-Most "chat with your papers" tools stop at retrieval-augmented generation: fetch some chunks, stuff them in a prompt, hope the model doesn't hallucinate. BioGenesis asks a sharper question:
+> An evidence-aware multi-agent system for biomedical hypothesis generation, built and evaluated as a **research artifact**: 9 experimental configurations (3 baselines + 1 full system + 5 ablations) sharing one code path, 65 offline unit tests, a three-way metric split (automated / LLM-judged / human) that is never blended into a single misleading number, and zero fabricated results anywhere in the repo. Built entirely on free-tier infrastructure. A benchmark run and arXiv writeup are in progress — see [Experimental Status](#-experimental-status) for live numbers.
 
-> **Can an evidence-aware multi-agent architecture measurably improve the grounding, traceability, contradiction-handling, and reliability of biomedical research synthesis compared to a plain LLM or a standard RAG pipeline — and can that improvement actually be proven, not just claimed?**
+## 🔍 Overview
 
-To answer that honestly, BioGenesis is built so that:
+Most "chat with your papers" tools stop at retrieval-augmented generation: fetch a few chunks, stuff them in a prompt, hope the model doesn't hallucinate. BioGenesis was built to test a sharper, falsifiable question:
 
-- Every component (Planner, semantic retrieval, evidence scoring, knowledge graph, memory, critic) is behind an **ablation flag** on the *same* orchestrator — there's no forked "demo version" vs. "real version" of the pipeline.
-- Every metric is labeled by *what kind of claim it is*: **automated** (deterministic, mechanical), **LLM-judged** (a model's opinion, reported as such), and **human** (a template waiting for a person to fill in). They are never blended into one "accuracy" number.
-- Nothing is fabricated to make a slide look better: if gold relevance labels don't exist yet, `precision@k` reports `None` with a note — it does not silently become `0.0` or get skipped.
+> **Can an evidence-aware multi-agent architecture measurably improve the grounding, traceability, contradiction-handling, and reliability of biomedical research synthesis compared to a plain LLM or standard RAG — and can that improvement be proven, not just claimed?**
+
+Given a research question, BioGenesis:
+
+1. **Plans** — decomposes it into sub-questions
+2. **Retrieves** — pulls relevant literature from PubMed
+3. **Grounds** — extracts structured, scored evidence claims and links them in a knowledge graph
+4. **Generates** — proposes hypotheses that must cite specific evidence
+5. **Critiques** — an adversarial agent reviews each hypothesis
+6. **Verifies** — a separate pass checks whether each citation *actually* entails the claim it's attached to
+7. **Remembers** — persists everything to local storage so future questions build on past reasoning
+
+Every one of those seven steps is individually switchable, so the system's actual contribution can be isolated and measured — not assumed.
 
 ## 🏗️ Architecture
 
-```
-research question
-   │
-   ▼
-┌───────────────────────────────────────────────────────────────┐
-│  Planner Agent            decomposes into sub-questions        │  [ablation: use_planner]
-└───────────────────────────────────────────────────────────────┘
-   │
-   ▼
- PubMed retrieval (per sub-question)
-   │
-   ▼
- Preprocessing → chunking → embeddings → Chroma vector index
-   │
-   ▼
-┌───────────────────────────────────────────────────────────────┐
-│  Semantic retrieval    top-k relevant chunks per sub-question  │  [ablation: use_semantic_retrieval]
-└───────────────────────────────────────────────────────────────┘
-   │
-   ▼
-┌───────────────────────────────────────────────────────────────┐
-│  Evidence extraction   LLM pulls structured claims             │
-│  Evidence scoring      study-type hierarchy + recency decay    │  [ablation: use_evidence_scoring]
-└───────────────────────────────────────────────────────────────┘
-   │
-   ▼
-┌───────────────────────────────────────────────────────────────┐
-│  Knowledge graph       NetworkX entity/claim graph              │  [ablation: use_knowledge_graph]
-│  Memory retrieval      related past hypotheses injected        │  [ablation: use_memory]
-└───────────────────────────────────────────────────────────────┘
-   │
-   ▼
-┌───────────────────────────────────────────────────────────────┐
-│  Hypothesis Generator  proposes hypotheses, must cite evidence  │
-└───────────────────────────────────────────────────────────────┘
-   │
-   ▼
-┌───────────────────────────────────────────────────────────────┐
-│  Scientific Critic     adversarial review of each hypothesis    │  [ablation: use_critic]
-└───────────────────────────────────────────────────────────────┘
-   │
-   ▼
-┌───────────────────────────────────────────────────────────────┐
-│  Citation support check   entailment: does the citation        │  [opt-in: use_support_checking]
-│                            actually support the claim?          │
-└───────────────────────────────────────────────────────────────┘
-   │
-   ▼
- Evaluation (automated + LLM-judged, kept separate)
-   │
-   ▼
- Persistence → SQLite memory + knowledge-graph JSON
+```mermaid
+flowchart TD
+    Q[Research Question] --> P["🧭 Planner Agent<br/><i>decomposes into sub-questions</i><br/>[ablation: use_planner]"]
+    P --> R[PubMed Retrieval<br/>per sub-question]
+    R --> E[Preprocess → Chunk → Embed → Chroma Index]
+    E --> S["🔎 Semantic Retrieval<br/><i>top-k relevant chunks</i><br/>[ablation: use_semantic_retrieval]"]
+    S --> EX["📑 Evidence Extraction & Scoring<br/><i>study-type + recency heuristic</i><br/>[ablation: use_evidence_scoring]"]
+    EX --> KG["🕸️ Knowledge Graph<br/>[ablation: use_knowledge_graph]"]
+    EX --> MEM["🧠 Memory Retrieval<br/><i>related past hypotheses</i><br/>[ablation: use_memory]"]
+    KG --> HG["💡 Hypothesis Generator<br/><i>must cite evidence IDs</i>"]
+    MEM --> HG
+    HG --> C["⚖️ Scientific Critic<br/><i>adversarial review</i><br/>[ablation: use_critic]"]
+    C --> SC["✅ Citation Support Check<br/><i>does the citation entail the claim?</i><br/>[opt-in: use_support_checking]"]
+    SC --> EV[Evaluation<br/>automated + LLM-judged, kept separate]
+    EV --> PER[(Persistence<br/>SQLite memory + graph JSON)]
+
+    style Q fill:#4A90D9,color:#fff
+    style PER fill:#4A90D9,color:#fff
 ```
 
-Every `[ablation: …]` flag is a constructor argument on `BioGenesisOrchestrator`. The full system and every ablation run through the **exact same code path** — this is what makes the comparisons in the results section meaningful rather than anecdotal.
+Every `[ablation: …]` tag is a constructor argument on `BioGenesisOrchestrator` — the full system and every ablation run through the **exact same code path**. There is no separate "demo version." This is what makes the results in [Section: Experimental Status](#-experimental-status) an actual comparison rather than an anecdote.
 
 ## 📁 Repository Layout
 
@@ -125,70 +87,52 @@ biogenesis/
 │   ├── benchmark_schema.py     # benchmark item schema + loader
 │   ├── benchmark.json          # example benchmark questions (no fabricated gold data)
 │   ├── baselines.py            # LLM-only / standard RAG / evidence-aware RAG
-│   ├── runner.py               # CLI: run any config against any benchmark
-│   ├── configs/*.yaml          # 9 experiment configs (3 baselines + 6 ablations)
-│   └── results/                # JSONL output (gitignored)
-├── pipeline.py                 # quick manual full-system run
-├── tests/                      # 65 offline, fakes-based unit tests
-├── data/                       # local vector DB + memory DB
-└── .env.example
+│   ├── runner.py                # CLI: run any config against any benchmark
+│   ├── configs/*.yaml           # 9 experiment configs (3 baselines + 6 ablations)
+│   └── results/                 # JSONL output (gitignored)
+├── pipeline.py                  # quick manual full-system run
+├── tests/                       # 65 offline, fakes-based unit tests
+├── docs/ARCHITECTURE.md         # design rationale for each component
+├── data/                        # local vector DB + memory DB (gitignored)
+├── .env.example
+└── LICENSE
 ```
 
-## 🚀 Getting Started
-
-### 1. Create a virtual environment
+## ⚡ Quickstart
 
 ```bash
 git clone https://github.com/Ayesha037/biogenesis.git
 cd biogenesis
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### 2. Install dependencies
-
-```bash
-pip install -r requirements.txt
-pip install -e .
-```
-
-> `sentence-transformers` downloads a small (~80 MB) embedding model on first run. This needs internet access once; every run after that is offline.
-
-### 3. Add your free API keys
-
-```bash
-cp .env.example .env
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && pip install -e .
+cp .env.example .env    # then add your free GROQ_API_KEY — see below
 ```
 
 | Variable | Where to get it | Required? |
 |---|---|---|
 | `GROQ_API_KEY` | [console.groq.com/keys](https://console.groq.com/keys) — free, no card | **Yes** |
 | `NCBI_EMAIL` | Your email address | Recommended (NCBI usage policy) |
-| `NCBI_API_KEY` | [ncbi.nlm.nih.gov/account](https://www.ncbi.nlm.nih.gov/account/) → API Key Management — free | Optional (raises PubMed rate limit 3 → 10 req/sec) |
+| `NCBI_API_KEY` | [ncbi.nlm.nih.gov/account](https://www.ncbi.nlm.nih.gov/account/) → API Key Management — free | Optional (3 → 10 req/sec) |
 
-Everything else — vector DB, knowledge graph, memory — is local and needs no account.
+Everything else — vector DB, knowledge graph, memory — is local, free, and needs no account.
 
-## ▶️ Running the Full System
+**Run the full system on one question:**
 
 ```bash
 python pipeline.py "does metformin reduce cancer risk in diabetic patients"
 ```
 
-This runs every component end to end: plan → retrieve → embed → semantically filter → extract evidence → score → build the knowledge graph → pull in relevant memory → generate hypotheses → critique → check citation support → evaluate → persist to `data/`.
+This plans → retrieves → embeds → filters → extracts evidence → scores it → builds the knowledge graph → pulls in relevant memory → generates hypotheses → critiques them → checks citation support → evaluates → persists everything to `data/`. First run is slower while the embedding model downloads (~80MB, one time); every run after reuses the local index.
 
-First run is slower while the embedding model downloads and the vector store populates; subsequent runs reuse the local index.
-
-## 🧪 Testing
+**Run the test suite** (no API key needed — everything's a fake):
 
 ```bash
 pytest tests/
 ```
 
-All 65 tests run **offline and deterministically** — every external dependency (LLM, PubMed, embeddings, vector store) is a dependency-injected fake (`tests/fakes.py`), so no API key is needed to verify correctness. Coverage includes PubMed XML parsing, evidence scoring heuristics, knowledge-graph contradiction detection, JSON repair, the citation support checker, the three-way evaluation-metric split, benchmark schema validation, result serialization (with an explicit check that API keys never leak into output), and — critically — a test that every ablation flag **actually disables** its component rather than existing as dead weight.
-
 ## 🔬 Research Framework
 
-BioGenesis ships with a full experimental harness so its central claim can be tested, not just asserted.
+BioGenesis ships with a full experimental harness so its central claim can be tested, not asserted.
 
 **Nine configurations, one benchmark, one comparable output schema:**
 
@@ -204,51 +148,46 @@ BioGenesis ships with a full experimental harness so its central claim can be te
 | `no_planner` | Ablation | Full minus sub-question decomposition |
 | `no_memory` | Ablation | Full minus memory-augmented reasoning |
 
-Each ablation config differs from `full_biogenesis.yaml` by **exactly one flag** — enforced by a dedicated test so comparisons can't silently become confounded.
+Each ablation differs from `full_biogenesis.yaml` by **exactly one flag** — enforced by a dedicated test, so comparisons can't silently become confounded.
 
 ```bash
-# Single config, full benchmark
 python experiments/runner.py --config full_biogenesis --benchmark experiments/benchmark.json
-
-# Compare against a baseline
 python experiments/runner.py --config standard_rag --benchmark experiments/benchmark.json
-
-# Full system, also computing citation_support_rate (adds one LLM call per citation)
 python experiments/runner.py --config full_biogenesis --benchmark experiments/benchmark.json --check-support
 ```
 
-Metrics are split into three categories that are **never** blended:
+**Metrics are split into categories that are never blended:**
 
 - **Automated** — citation validity, evidence coverage/diversity, contradiction rate, citation support rate. Deterministic.
-- **LLM-judged** — Critic approval rate and verdict distribution. Explicitly labeled as model opinion.
+- **LLM-judged** — Critic approval rate and verdict distribution. Explicitly labeled as model opinion, not ground truth.
 - **Human** — an unrated template (`human_eval_schema()`) for a person to score. No rating is ever invented.
 - **Retrieval** — precision/recall/nDCG@k, computed only when gold-relevant PMIDs exist for a benchmark item; otherwise reported as `None` with a note, never a fabricated zero.
 
 ## 📊 Experimental Status
 
-Live progress on the benchmark run (Groq free-tier rate limits mean this is happening in batches — not a limitation of the architecture, just of a $0 budget):
+*Live, updated as the free-tier Groq benchmark run progresses:*
 
 | Configuration | Progress | Status |
 |---|---:|:---:|
 | LLM-only (baseline) | 40 / 40 | ✅ Complete |
 | Standard RAG (baseline) | 40 / 40 | ✅ Complete |
-| Evidence-aware RAG (baseline) | 22 / 40 | 🔄 In progress (18 remaining) |
+| Evidence-aware RAG (baseline) | 22 / 40 | 🔄 In progress |
 | Full BioGenesis | 0 / 40 | ⏳ Queued |
 
-> **No comparative performance claim is made anywhere in this repository until the full benchmark run completes.** Once all four configurations finish, results will be published here alongside the automated + LLM-judged metrics, ahead of submission to arXiv. Structural correctness of all 9 configs (including the 6 ablations not shown above) has already been verified offline with fakes — see [Verification Performed](#verification-performed).
+> **No comparative performance claim is made anywhere in this repository until the full benchmark completes.** Results and automated/LLM-judged metrics will be published here ahead of an arXiv submission.
 
-### Verification Performed
+**Verification performed so far:**
 
-- **65/65 unit and integration tests passing** — including a check that every ablation flag genuinely disables its component.
-- **A real end-to-end attempt** against live PubMed/Groq confirmed the runner fails *safely*: network errors are captured as `status="error"` records with the real traceback, not silently swallowed or faked.
-- **An offline structural run** (fake LLM/PubMed responses) executed all 9 configs × multiple questions to confirm the runner, dispatch, ablation flags, and JSONL serialization work end-to-end — this proves the wiring is correct, not the real-world answer quality, which is exactly what the benchmark above is measuring.
+- ✅ 65/65 unit and integration tests passing, including a test that every ablation flag *actually disables* its component
+- ✅ A real end-to-end attempt against live PubMed/Groq confirmed the runner fails *safely* — errors are captured as `status="error"` records with the real traceback, never silently swallowed or faked
+- ✅ An offline structural run (fake LLM/PubMed responses) executed all 9 configs to confirm the runner, dispatch, ablation flags, and JSONL serialization work end-to-end
 
 ## ⚠️ Known Limitations
 
-Being upfront about these, since the research framework's whole point is not overselling results:
+Stated plainly, because the point of the research framework is to not oversell results:
 
-- Evidence extraction and hypothesis quality depend on the Groq-hosted model's reasoning — a free 70B-class model is good but not infallible. Treat outputs as a research **aid**, not ground truth.
-- Evidence scoring is a transparent heuristic (study-type hierarchy + recency decay), not a learned or validated model.
+- Evidence extraction and hypothesis quality depend on the Groq-hosted model's reasoning — a free 70B-class model is good, not infallible. Outputs are a research **aid**, not ground truth.
+- Evidence scoring is a transparent heuristic (study-type hierarchy + recency decay), not a learned/validated model.
 - Entity resolution is naive: `"Metformin"` and `"metformin hydrochloride"` are currently distinct graph nodes. Real biomedical entity normalization (e.g. UMLS linking) is future work.
 - Contradiction resolution *surfaces* conflicts; it does not adjudicate them.
 - Memory retrieval is keyword-overlap based, not semantic.
@@ -256,32 +195,32 @@ Being upfront about these, since the research framework's whole point is not ove
 
 ## 🗺️ Roadmap
 
-- [ ] Finish the `full_biogenesis` benchmark run (in progress, Groq free-tier throttled)
+- [ ] Finish the `full_biogenesis` benchmark run
 - [ ] Expand `experiments/benchmark.json` from 8 to 30–50 questions
-- [ ] Source real gold relevance labels for retrieval metrics (precision/recall/nDCG@k)
+- [ ] Source real gold relevance labels for retrieval metrics
 - [ ] Run `--check-support` at scale for real citation-support numbers
-- [ ] Conduct human evaluation using the `human_eval_schema()` template
-- [ ] Add biomedical entity normalization (UMLS/MeSH linking) before graph insertion
-- [ ] Swap the embedding model for a biomedical-domain one (e.g. PubMedBERT-based)
-- [ ] Add full-text retrieval via the PMC Open Access subset, not just abstracts
+- [ ] Conduct human evaluation using `human_eval_schema()`
+- [ ] Add biomedical entity normalization (UMLS/MeSH linking)
+- [ ] Swap to a biomedical-domain embedding model (e.g. PubMedBERT)
+- [ ] Add full-text retrieval via the PMC Open Access subset
 - [ ] Submit results paper to arXiv
 
 ## 💸 Why $0 Cost
 
-Every component runs on a free tier or free open-source software — no paid plan, no credit card, anywhere in the stack:
-
 | Component | Free tier used |
 |---|---|
-| LLM inference | Groq API (free) |
-| Literature retrieval | NCBI PubMed E-utilities (free) |
-| Embeddings | `sentence-transformers`, local, open-source |
-| Vector store | Chroma, local, open-source |
-| Knowledge graph | NetworkX, local, open-source |
-| Memory | SQLite, local |
+| LLM inference | Groq API |
+| Literature retrieval | NCBI PubMed E-utilities |
+| Embeddings | `sentence-transformers` (local, open-source) |
+| Vector store | Chroma (local, open-source) |
+| Knowledge graph | NetworkX (local, open-source) |
+| Memory | SQLite (local) |
+
+No paid plan, no credit card, anywhere in the stack — by design, so the system is reproducible by anyone.
 
 ## 📄 Citation
 
-A results paper is in preparation for arXiv once the full benchmark run completes. In the meantime, if you reference this work:
+A results paper is in preparation for arXiv once the benchmark run completes.
 
 ```bibtex
 @software{biogenesis2026,
@@ -294,8 +233,12 @@ A results paper is in preparation for arXiv once the full benchmark run complete
 
 ## 📜 License
 
-MIT — see [`LICENSE`](LICENSE).
+[MIT](LICENSE) — free to use, modify, and build on, with attribution.
 
 ---
 
-<p align="center">Built as a research artifact, one ablation flag at a time.</p>
+<div align="center">
+
+Built as a research artifact, one ablation flag at a time.
+
+</div>
