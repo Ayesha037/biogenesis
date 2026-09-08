@@ -1,0 +1,14 @@
+name: no_knowledge_graph
+type: biogenesis
+description: >
+  SYSTEM 4 / ablation "Full Biogenesis - Knowledge Graph". Identical to
+  full_biogenesis except use_knowledge_graph=false. Contradiction
+  detection will report contradiction_rate=None (no graph to check), not 0.
+top_k: 8
+papers_per_subquestion: 5
+use_planner: true
+use_semantic_retrieval: true
+use_evidence_scoring: true
+use_knowledge_graph: false
+use_critic: true
+use_memory: true

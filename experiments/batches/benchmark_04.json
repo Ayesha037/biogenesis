@@ -1,0 +1,50 @@
+{
+  "_schema_note": "Biogenesis research benchmark v1.0. Questions are curated for evidence-aware biomedical synthesis. No gold answers, gold PMIDs, or gold references are fabricated. expected_evidence_characteristics describes the evidence types or methodological distinctions the evaluation should consider.",
+  "items": [
+    {
+      "id": "bg-016",
+      "question": "How useful is C-reactive protein as a biomarker of inflammation and cardiovascular risk?",
+      "category": "biomarker_disease",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Prospective cohorts, clinical studies, and systematic reviews; distinguish association from clinical utility.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-017",
+      "question": "What evidence supports the use of troponin levels for risk stratification in patients with acute coronary syndromes?",
+      "category": "biomarker_disease",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Clinical cohorts, diagnostic/prognostic studies, and guidelines.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-018",
+      "question": "How accurate is HbA1c for diagnosing diabetes compared with glucose-based diagnostic tests?",
+      "category": "biomarker_disease",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Diagnostic accuracy studies and guidelines; consider population and clinical context.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-019",
+      "question": "Is circulating cell-free DNA associated with prognosis in patients with advanced cancer?",
+      "category": "biomarker_disease",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Human cohort studies and meta-analyses; distinguish prognostic association from predictive utility.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-020",
+      "question": "What evidence supports natriuretic peptides as biomarkers for prognosis in heart failure?",
+      "category": "biomarker_disease",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Prospective cohorts, randomized-trial analyses, systematic reviews, and guidelines.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    }
+  ]
+}

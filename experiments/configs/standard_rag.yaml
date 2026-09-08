@@ -1,0 +1,8 @@
+name: standard_rag
+type: standard_rag
+description: >
+  BASELINE 2. Question -> PubMed retrieval -> top-k relevant chunks -> LLM
+  -> Answer. Citations reference raw retrieved chunk IDs, not verified
+  evidence items -- there is no extraction or scoring step.
+top_k: 8
+max_papers: 10

@@ -1,0 +1,50 @@
+{
+  "_schema_note": "Five-question pilot benchmark drawn from Biogenesis Biomedical Research Benchmark v1. No gold answers or gold_relevant_pmids are fabricated.",
+  "items": [
+    {
+      "id": "bg-001",
+      "question": "What evidence exists that metformin is associated with reduced risk of colorectal cancer in people with type 2 diabetes?",
+      "category": "drug_disease_outcome",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Human observational studies, meta-analyses, and clinical evidence; distinguish association from causation.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-002",
+      "question": "What evidence supports the use of SGLT2 inhibitors for reducing heart-failure hospitalization in patients with type 2 diabetes?",
+      "category": "drug_disease_outcome",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Randomized controlled trials and meta-analyses; prioritize cardiovascular outcome trials.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-003",
+      "question": "What is the evidence that BRCA1 pathogenic variants increase the risk of breast and ovarian cancer?",
+      "category": "gene_disease",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Genetic penetrance studies, cohort studies, and clinical guidelines.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-004",
+      "question": "What evidence supports the use of troponin levels for risk stratification in patients with acute coronary syndromes?",
+      "category": "biomarker_disease",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Clinical cohorts, diagnostic/prognostic studies, and guidelines.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-005",
+      "question": "Does vitamin D supplementation reduce the risk of cardiovascular disease?",
+      "category": "conflicting_evidence",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Randomized trials, observational studies, and meta-analyses; explicitly identify conflicting evidence and differences in populations and doses.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    }
+  ]
+}

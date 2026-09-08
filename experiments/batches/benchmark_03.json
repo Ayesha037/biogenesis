@@ -1,0 +1,50 @@
+{
+  "_schema_note": "Biogenesis research benchmark v1.0. Questions are curated for evidence-aware biomedical synthesis. No gold answers, gold PMIDs, or gold references are fabricated. expected_evidence_characteristics describes the evidence types or methodological distinctions the evaluation should consider.",
+  "items": [
+    {
+      "id": "bg-011",
+      "question": "What evidence links APOE ε4 to increased risk and altered disease progression in Alzheimer disease?",
+      "category": "gene_disease",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Genetic association studies, cohort studies, mechanistic studies, and meta-analyses.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-012",
+      "question": "What is the evidence that BRCA1 pathogenic variants increase the risk of breast and ovarian cancer?",
+      "category": "gene_disease",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Genetic penetrance studies, cohort studies, and clinical guidelines.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-013",
+      "question": "How does PCSK9 biology relate to familial hypercholesterolemia and elevated LDL cholesterol?",
+      "category": "gene_disease",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Human genetics, functional studies, and clinical evidence.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-014",
+      "question": "What evidence connects TCF7L2 genetic variation with risk of type 2 diabetes?",
+      "category": "gene_disease",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Genome-wide association studies, replication studies, and functional evidence.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-015",
+      "question": "What evidence supports a role for EGFR alterations in the development or treatment response of non-small-cell lung cancer?",
+      "category": "gene_disease",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Genomic studies, mechanistic research, and clinical trials of EGFR-targeted therapies.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    }
+  ]
+}

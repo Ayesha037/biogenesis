@@ -1,0 +1,14 @@
+name: no_evidence_scoring
+type: biogenesis
+description: >
+  Ablation "Full Biogenesis - Evidence Scoring". Identical to
+  full_biogenesis except use_evidence_scoring=false. All evidence keeps
+  its default (unscored) confidence of 0.0.
+top_k: 8
+papers_per_subquestion: 5
+use_planner: true
+use_semantic_retrieval: true
+use_evidence_scoring: false
+use_knowledge_graph: true
+use_critic: true
+use_memory: true

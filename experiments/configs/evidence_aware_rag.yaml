@@ -1,0 +1,9 @@
+name: evidence_aware_rag
+type: evidence_aware_rag
+description: >
+  BASELINE 3. Question -> PubMed retrieval -> Evidence extraction ->
+  Evidence scoring -> LLM -> Answer. No Planner (single question, no
+  decomposition), no Critic, no Knowledge Graph. Isolates what structured
+  evidence extraction + scoring adds over raw-chunk retrieval (Baseline 2).
+top_k: 8
+max_papers: 10

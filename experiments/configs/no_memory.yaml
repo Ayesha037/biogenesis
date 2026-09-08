@@ -1,0 +1,18 @@
+name: no_memory
+type: biogenesis
+description: >
+  Ablation "Full Biogenesis - Memory". Identical to full_biogenesis except
+  use_memory=false. With this flag off, the orchestrator never constructs
+  a MemoryStore for the run at all, so BOTH past-hypothesis retrieval
+  (injection into the generator's prompt) AND end-of-run persistence of
+  this session are skipped -- this run leaves no trace in memory and reads
+  none. This is a deliberate simplification so the ablation is a genuine
+  "memory absent" condition, not just "memory not consulted."
+top_k: 8
+papers_per_subquestion: 5
+use_planner: true
+use_semantic_retrieval: true
+use_evidence_scoring: true
+use_knowledge_graph: true
+use_critic: true
+use_memory: false

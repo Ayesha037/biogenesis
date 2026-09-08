@@ -1,0 +1,50 @@
+{
+  "_schema_note": "Biogenesis research benchmark v1.0. Questions are curated for evidence-aware biomedical synthesis. No gold answers, gold PMIDs, or gold references are fabricated. expected_evidence_characteristics describes the evidence types or methodological distinctions the evaluation should consider.",
+  "items": [
+    {
+      "id": "bg-001",
+      "question": "What evidence exists that metformin is associated with reduced risk of colorectal cancer in people with type 2 diabetes?",
+      "category": "drug_disease_outcome",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Human observational studies, meta-analyses, and clinical evidence; distinguish association from causation.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-002",
+      "question": "What evidence exists for an association between statin use and reduced risk of hepatocellular carcinoma?",
+      "category": "drug_disease_outcome",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Human cohort/case-control studies and meta-analyses; assess confounding and consistency.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-003",
+      "question": "Does aspirin improve outcomes in patients with established colorectal cancer?",
+      "category": "drug_disease_outcome",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Clinical and observational human studies; separate recurrence, survival, and prevention outcomes.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-004",
+      "question": "What evidence supports the use of SGLT2 inhibitors for reducing heart-failure hospitalization in patients with type 2 diabetes?",
+      "category": "drug_disease_outcome",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Randomized controlled trials and meta-analyses; prioritize cardiovascular outcome trials.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-005",
+      "question": "Do GLP-1 receptor agonists improve cardiovascular outcomes in people with type 2 diabetes at elevated cardiovascular risk?",
+      "category": "drug_disease_outcome",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Randomized cardiovascular outcome trials and systematic reviews.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    }
+  ]
+}

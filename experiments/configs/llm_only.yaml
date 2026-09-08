@@ -1,0 +1,8 @@
+name: llm_only
+type: llm_only
+description: >
+  BASELINE 1. Question -> LLM -> Answer. No retrieval, no evidence,
+  no citations. The floor comparison every other configuration should
+  beat on grounding/traceability metrics (it cannot score on those at all
+  since it has no evidence pool -- this is expected and correctly reported
+  as "unavailable", not zero).

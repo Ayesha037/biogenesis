@@ -1,0 +1,50 @@
+{
+  "_schema_note": "Biogenesis research benchmark v1.0. Questions are curated for evidence-aware biomedical synthesis. No gold answers, gold PMIDs, or gold references are fabricated. expected_evidence_characteristics describes the evidence types or methodological distinctions the evaluation should consider.",
+  "items": [
+    {
+      "id": "bg-031",
+      "question": "Is chronic sleep deprivation associated with increased risk of obesity in adults?",
+      "category": "association_risk",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Prospective cohorts, meta-analyses, and experimental studies; assess confounding and reverse causation.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-032",
+      "question": "Is air-pollution exposure associated with increased cardiovascular disease risk?",
+      "category": "association_risk",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Large epidemiologic cohorts, meta-analyses, and mechanistic studies.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-033",
+      "question": "Is sedentary behavior independently associated with mortality risk after accounting for physical activity?",
+      "category": "association_risk",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Prospective cohort studies and meta-analyses; inspect adjustment strategies and heterogeneity.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-034",
+      "question": "Is chronic periodontitis associated with increased risk of cardiovascular disease?",
+      "category": "association_risk",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Epidemiologic studies and systematic reviews; evaluate residual confounding and causal uncertainty.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-035",
+      "question": "Is vitamin D deficiency associated with increased risk of depression?",
+      "category": "association_risk",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Observational studies, randomized supplementation trials, and meta-analyses; distinguish association from treatment effect.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+name: no_critic
+type: biogenesis
+description: >
+  SYSTEM 5 / ablation "Full Biogenesis - Critic". Identical to
+  full_biogenesis except use_critic=false. Hypotheses will carry
+  critique_verdict="not-evaluated", which llm_judged_metrics excludes from
+  critic_approval_rate (not counted as approved).
+top_k: 8
+papers_per_subquestion: 5
+use_planner: true
+use_semantic_retrieval: true
+use_evidence_scoring: true
+use_knowledge_graph: true
+use_critic: false
+use_memory: true

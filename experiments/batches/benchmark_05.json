@@ -1,0 +1,50 @@
+{
+  "_schema_note": "Biogenesis research benchmark v1.0. Questions are curated for evidence-aware biomedical synthesis. No gold answers, gold PMIDs, or gold references are fabricated. expected_evidence_characteristics describes the evidence types or methodological distinctions the evaluation should consider.",
+  "items": [
+    {
+      "id": "bg-021",
+      "question": "What is the evidence that statins increase the risk of clinically significant muscle injury?",
+      "category": "drug_adverse_event",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Randomized trials, observational studies, and systematic reviews; distinguish myalgia from rhabdomyolysis.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-022",
+      "question": "Is long-term proton-pump inhibitor use associated with increased risk of chronic kidney disease?",
+      "category": "drug_adverse_event",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Observational cohorts and systematic reviews; explicitly assess confounding and causality.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-023",
+      "question": "What evidence links immune checkpoint inhibitors with myocarditis?",
+      "category": "drug_adverse_event",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Case series, pharmacovigilance, cohort studies, and clinical reviews; assess rarity and severity.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-024",
+      "question": "Does metformin use increase the risk of clinically important lactic acidosis?",
+      "category": "drug_adverse_event",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Clinical studies, pharmacovigilance, and systematic reviews; distinguish theoretical risk from observed incidence.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-025",
+      "question": "What evidence links fluoroquinolone antibiotics to aortic aneurysm or dissection?",
+      "category": "drug_adverse_event",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Observational studies, pharmacovigilance, systematic reviews, and regulatory evidence; assess conflicting findings.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    }
+  ]
+}

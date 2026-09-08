@@ -1,0 +1,50 @@
+{
+  "_schema_note": "Biogenesis research benchmark v1.0. Questions are curated for evidence-aware biomedical synthesis. No gold answers, gold PMIDs, or gold references are fabricated. expected_evidence_characteristics describes the evidence types or methodological distinctions the evaluation should consider.",
+  "items": [
+    {
+      "id": "bg-026",
+      "question": "How does AMPK activation influence cellular energy metabolism and cancer-related signaling?",
+      "category": "mechanism",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Mechanistic studies, molecular biology research, and relevant human evidence; distinguish cell/animal models from clinical evidence.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-027",
+      "question": "How does the gut microbiome influence host glucose metabolism and insulin sensitivity?",
+      "category": "mechanism",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Human microbiome studies, intervention studies, and mechanistic research.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-028",
+      "question": "What mechanisms connect chronic inflammation with atherosclerosis?",
+      "category": "mechanism",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Human studies plus mechanistic and translational research; identify causal versus associative evidence.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-029",
+      "question": "How does the mTOR pathway regulate cellular growth and metabolism, and what evidence links it to aging?",
+      "category": "mechanism",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Molecular, animal, and human studies; separate mechanistic plausibility from demonstrated clinical effects.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-030",
+      "question": "What mechanisms explain resistance to EGFR-targeted therapy in non-small-cell lung cancer?",
+      "category": "mechanism",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Molecular studies, tumor sequencing, clinical cohorts, and treatment-resistance studies.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    }
+  ]
+}

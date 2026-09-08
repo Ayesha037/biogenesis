@@ -1,0 +1,50 @@
+{
+  "_schema_note": "Biogenesis research benchmark v1.0. Questions are curated for evidence-aware biomedical synthesis. No gold answers, gold PMIDs, or gold references are fabricated. expected_evidence_characteristics describes the evidence types or methodological distinctions the evaluation should consider.",
+  "items": [
+    {
+      "id": "bg-006",
+      "question": "Does early administration of corticosteroids improve outcomes in patients with severe COVID-19 requiring supplemental oxygen?",
+      "category": "treatment_outcome",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Randomized trials and systematic reviews; distinguish severity groups.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-007",
+      "question": "Does pulmonary rehabilitation improve exercise capacity and quality of life in people with chronic obstructive pulmonary disease?",
+      "category": "treatment_outcome",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Randomized trials and systematic reviews with functional and quality-of-life outcomes.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-008",
+      "question": "Does cognitive behavioral therapy improve symptoms and functioning in adults with chronic insomnia?",
+      "category": "treatment_outcome",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Randomized trials and systematic reviews; distinguish sleep outcomes from broader functioning.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-009",
+      "question": "Does intensive blood-pressure control reduce the risk of cardiovascular events compared with standard blood-pressure targets in adults with hypertension?",
+      "category": "treatment_outcome",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Randomized trials and meta-analyses; consider adverse events and target definitions.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    },
+    {
+      "id": "bg-010",
+      "question": "Does exercise training improve glycemic control in adults with type 2 diabetes?",
+      "category": "treatment_outcome",
+      "sub_questions": [],
+      "expected_evidence_characteristics": "Randomized trials and meta-analyses; compare aerobic, resistance, and combined exercise where possible.",
+      "gold_relevant_pmids": null,
+      "gold_reference": null
+    }
+  ]
+}

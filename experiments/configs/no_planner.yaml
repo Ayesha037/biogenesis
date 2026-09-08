@@ -1,0 +1,14 @@
+name: no_planner
+type: biogenesis
+description: >
+  Ablation "Full Biogenesis - Planner". Identical to full_biogenesis
+  except use_planner=false. The research question is used as-is with no
+  sub-question decomposition (sub_questions = [research_question]).
+top_k: 8
+papers_per_subquestion: 5
+use_planner: false
+use_semantic_retrieval: true
+use_evidence_scoring: true
+use_knowledge_graph: true
+use_critic: true
+use_memory: true

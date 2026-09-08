@@ -1,0 +1,12 @@
+[project]
+name = "biogenesis"
+version = "0.1.0"
+description = "A persistent, evidence-aware multi-agent biomedical AI research assistant."
+requires-python = ">=3.10"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"

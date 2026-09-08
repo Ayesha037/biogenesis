@@ -1,0 +1,15 @@
+name: full_biogenesis
+type: biogenesis
+description: >
+  SYSTEM 6 / ablation baseline "Full Biogenesis". Every component enabled:
+  Planner, semantic retrieval, evidence scoring, knowledge graph, critic,
+  memory. All other ablation configs in this directory are this config
+  with exactly one use_* flag flipped to false.
+top_k: 8
+papers_per_subquestion: 5
+use_planner: true
+use_semantic_retrieval: true
+use_evidence_scoring: true
+use_knowledge_graph: true
+use_critic: true
+use_memory: true
