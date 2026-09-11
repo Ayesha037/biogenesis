@@ -1,6 +1,4 @@
-
 from __future__ import annotations
-
 from dataclasses import dataclass, field
 
 from biogenesis.evidence.models import Evidence
@@ -9,6 +7,7 @@ from biogenesis.llm_client import LLMClient
 from biogenesis.logging_utils import get_logger
 
 logger = get_logger(__name__)
+
 
 _SYSTEM_PROMPT = """You are a biomedical hypothesis generation agent. You \
 will be given a research question and a list of evidence items, each with \
@@ -31,6 +30,16 @@ respond with {"hypotheses": []}.
 Respond with JSON only -- no prose, no markdown code fences."""
 
 
+def _is_json_validation_error(exc: Exception) -> bool:
+    """Return True for Groq structured-output JSON validation failures."""
+    text = str(exc)
+    return (
+        "json_validate_failed" in text
+        or "Failed to validate JSON" in text
+        or "Failed to generate JSON" in text
+    )
+
+
 @dataclass
 class Hypothesis:
     hypothesis_id: str
@@ -46,17 +55,18 @@ class HypothesisGeneratorAgent:
     def __init__(self, llm: LLMClient | None = None) -> None:
         self.llm = llm or LLMClient()
 
-    def generate(
+    def _build_prompt(
         self,
         research_question: str,
         evidence_list: list[Evidence],
-        memory_context: str = "",
-    ) -> list[Hypothesis]:
+        memory_context: str,
+    ) -> str:
         evidence_block = "\n".join(
             f"[{e.evidence_id}] ({e.study_type}, confidence={e.confidence}) "
             f"{e.subject} -- {e.relation} -- {e.obj}. Claim: {e.claim}"
             for e in evidence_list
         )
+
         memory_block = (
             f"\n\nRelevant past research from memory (for context only -- "
             f"do not treat as evidence, do not cite these as evidence_ids):\n"
@@ -64,31 +74,92 @@ class HypothesisGeneratorAgent:
             if memory_context
             else ""
         )
-        prompt = (
+
+        return (
             f"Research question: {research_question}\n\n"
-            f"Available evidence:\n{evidence_block if evidence_block else '(none)'}"
+            f"Available evidence:\n"
+            f"{evidence_block if evidence_block else '(none)'}"
             f"{memory_block}"
         )
-        raw = self.llm.complete(
-            prompt=prompt, system=_SYSTEM_PROMPT, temperature=0.4, json_mode=True
-        )
+
+    def _parse_hypotheses(self, raw: str) -> list[Hypothesis]:
         parsed = parse_json_loose(raw)
         items = parsed.get("hypotheses", []) if isinstance(parsed, dict) else []
 
-        hypotheses = []
+        hypotheses: list[Hypothesis] = []
+
         for i, item in enumerate(items):
             try:
+                if not isinstance(item, dict):
+                    raise TypeError("hypothesis item is not an object")
+
                 hypotheses.append(
                     Hypothesis(
                         hypothesis_id=f"hyp_{i}",
                         text=item["hypothesis"],
                         rationale=item.get("rationale", ""),
-                        supporting_evidence_ids=item.get("supporting_evidence_ids", []),
+                        supporting_evidence_ids=item.get(
+                            "supporting_evidence_ids", []
+                        ),
                         confidence=float(item.get("confidence", 0.0)),
                     )
                 )
             except (KeyError, TypeError, ValueError) as e:
                 logger.warning("Skipping malformed hypothesis item: %s", e)
 
-        logger.info("Generated %d hypotheses", len(hypotheses))
         return hypotheses
+
+    def generate(
+        self,
+        research_question: str,
+        evidence_list: list[Evidence],
+        memory_context: str = "",
+    ) -> list[Hypothesis]:
+        prompt = self._build_prompt(
+            research_question,
+            evidence_list,
+            memory_context,
+        )
+
+        try:
+            raw = self.llm.complete(
+                prompt=prompt,
+                system=_SYSTEM_PROMPT,
+                temperature=0.4,
+                json_mode=True,
+            )
+            hypotheses = self._parse_hypotheses(raw)
+            logger.info("Generated %d hypotheses", len(hypotheses))
+            return hypotheses
+
+        except Exception as exc:
+            if not _is_json_validation_error(exc):
+                raise
+
+            logger.warning(
+                "Hypothesis generation JSON validation failed. "
+                "Trying one fallback request without forced JSON response format."
+            )
+
+            try:
+                fallback_raw = self.llm.complete(
+                    prompt=prompt,
+                    system=_SYSTEM_PROMPT,
+                    temperature=0.4,
+                    json_mode=False,
+                )
+
+                hypotheses = self._parse_hypotheses(fallback_raw)
+
+                logger.info(
+                    "Generated %d hypotheses using fallback non-forced-JSON mode",
+                    len(hypotheses),
+                )
+                return hypotheses
+
+            except Exception as fallback_exc:
+                logger.warning(
+                    "Fallback hypothesis generation failed: %s",
+                    fallback_exc,
+                )
+                return []
