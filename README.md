@@ -10,7 +10,7 @@
 [![Tests](https://img.shields.io/badge/tests-65%20passing-2ea44f)](#-testing)
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 [![Cost](https://img.shields.io/badge/cost-%240-success)](#-why-0-cost)
-[![Status](https://img.shields.io/badge/status-benchmark%20in%20progress-yellow)](#-experimental-status)
+[![Status](https://img.shields.io/badge/status-benchmark%20complete-brightgreen)](#-experimental-status)
 
 [Overview](#-overview) • [Architecture](#-architecture) • [Quickstart](#-quickstart) • [Research Framework](#-research-framework) • [Results](#-experimental-status) • [Limitations](#-known-limitations)
 
@@ -20,7 +20,7 @@
 
 ## 📌 TL;DR
 
-> An evidence-aware multi-agent system for biomedical hypothesis generation, built and evaluated as a **research artifact**: 9 experimental configurations (3 baselines + 1 full system + 5 ablations) sharing one code path, 65 offline unit tests, a three-way metric split (automated / LLM-judged / human) that is never blended into a single misleading number, and zero fabricated results anywhere in the repo. Built entirely on free-tier infrastructure. A benchmark run and arXiv writeup are in progress — see [Experimental Status](#-experimental-status) for live numbers.
+> An evidence-aware multi-agent system for biomedical hypothesis generation, built and evaluated as a **research artifact**: 9 defined experimental configurations (3 baselines + 1 full system + 5 single-component ablations) sharing one code path, 65 offline unit tests, a three-way metric split (automated / LLM-judged / human) that is never blended into a single misleading number, and zero fabricated results anywhere in the repo. Built entirely on free-tier infrastructure. **The primary 40-question benchmark is complete** for all four non-ablation configurations (LLM-only, Standard RAG, Evidence-aware RAG, Full BioGenesis) — see [Experimental Status](#-experimental-status). The five single-component ablations were not run as part of this benchmark. A preprint reporting the full results is available at: **[INSERT PREPRINTS.ORG LINK ONCE POSTED]**.
 
 ## 🔍 Overview
 
@@ -158,29 +158,44 @@ python experiments/runner.py --config full_biogenesis --benchmark experiments/be
 
 **Metrics are split into categories that are never blended:**
 
-- **Automated** — citation validity, evidence coverage/diversity, contradiction rate, citation support rate. Deterministic.
-- **LLM-judged** — Critic approval rate and verdict distribution. Explicitly labeled as model opinion, not ground truth.
-- **Human** — an unrated template (`human_eval_schema()`) for a person to score. No rating is ever invented.
-- **Retrieval** — precision/recall/nDCG@k, computed only when gold-relevant PMIDs exist for a benchmark item; otherwise reported as `None` with a note, never a fabricated zero.
+- **Automated** — citation *reference* validity (structural: does the cited evidence_id resolve? not a semantic-correctness judgment), evidence coverage/diversity, contradiction rate, citation support rate (semantic: does the cited evidence actually entail the claim?), unsupported-claim rate. Deterministic.
+- **LLM-judged** — the Critic's verdict distribution (`needs-caveats` / `weakly-supported` / `not-supported`), reported as raw counts. A `needs-caveats` verdict is a qualification, not a scientific-approval judgment, and is never compressed into a single "approval rate."
+- **Human** — an unrated template (`human_eval_schema()`) for a person to score. No rating is ever invented; none has been collected yet.
+- **Retrieval** — precision/recall/nDCG@k, computed only when gold-relevant PMIDs exist for a benchmark item; otherwise reported as `None` with a note, never a fabricated zero. (No gold-relevant-PMID labels exist for the current 40-question benchmark, so these are not currently reported for any configuration.)
+
+*Terminology here matches the accompanying preprint exactly, so a reader checking both doesn't see two different stories about the same numbers.*
 
 ## 📊 Experimental Status
 
-*Live, updated as the free-tier Groq benchmark run progresses:*
+**Benchmark complete.** All four reported configurations reached 40/40 on
+the finalized 40-question benchmark (8 categories × 5 questions each).
 
 | Configuration | Progress | Status |
 |---|---:|:---:|
 | LLM-only (baseline) | 40 / 40 | ✅ Complete |
 | Standard RAG (baseline) | 40 / 40 | ✅ Complete |
-| Evidence-aware RAG (baseline) | 22 / 40 | 🔄 In progress |
-| Full BioGenesis | 0 / 40 | ⏳ Queued |
+| Evidence-aware RAG (baseline) | 40 / 40 | ✅ Complete |
+| Full BioGenesis | 40 / 40 | ✅ Complete |
 
-> **No comparative performance claim is made anywhere in this repository until the full benchmark completes.** Results and automated/LLM-judged metrics will be published here ahead of an arXiv submission.
+> **Headline result, stated as cautiously as the data supports:** paired
+> statistical comparisons (Wilcoxon signed-rank + paired t-test, n=40) found
+> **no statistically significant difference** in retrieved-PMID or evidence
+> counts between Full BioGenesis and the simpler baselines. Within Full
+> BioGenesis, citation *reference* validity is high (0.966) but the
+> unsupported-claim rate is substantial (0.427) among the 29/40 questions
+> that produced at least one hypothesis. **The central research hypothesis —
+> that explicit evidence evaluation improves grounding — is partially, not
+> fully, supported.** Full results, statistical tests, and error breakdown
+> are in `RESULTS_FINAL.md`, `ERROR_ANALYSIS_FINAL.md`,
+> `STATISTICAL_COMPARISON_FINAL.md`, and the full preprint (link above).
 
-**Verification performed so far:**
+**Verification performed:**
 
 - ✅ 65/65 unit and integration tests passing, including a test that every ablation flag *actually disables* its component
-- ✅ A real end-to-end attempt against live PubMed/Groq confirmed the runner fails *safely* — errors are captured as `status="error"` records with the real traceback, never silently swallowed or faked
-- ✅ An offline structural run (fake LLM/PubMed responses) executed all 9 configs to confirm the runner, dispatch, ablation flags, and JSONL serialization work end-to-end
+- ✅ All four configurations completed to 40/40 canonical records. Intermediate free-tier rate-limit failures during execution (19 for Evidence-aware RAG, 57 for Full BioGenesis) were resolved via retry and are documented as *operational*, not scientific, events — see `ERROR_ANALYSIS_FINAL.md`
+- ⚠️ The five defined single-component ablations (`no_planner`, `no_critic`, `no_knowledge_graph`, `no_evidence_scoring`, `no_memory`) exist in `experiments/configs/` and are each verified by a repository test to differ from `full_biogenesis.yaml` by exactly one flag, but **were not run** as part of this benchmark — no individual-component causal claim is made anywhere in the results
+- ⚠️ No gold relevance labels exist for this benchmark, so retrieval precision/recall/nDCG are not reported for any configuration
+- ⚠️ No human expert evaluation has been collected; `human_eval_schema()` remains an unrated template
 
 ## ⚠️ Known Limitations
 
@@ -195,15 +210,18 @@ Stated plainly, because the point of the research framework is to not oversell r
 
 ## 🗺️ Roadmap
 
-- [ ] Finish the `full_biogenesis` benchmark run
-- [ ] Expand `experiments/benchmark.json` from 8 to 30–50 questions
+- [x] Finish the `full_biogenesis` benchmark run (40/40, all four configs)
+- [x] Expand `experiments/benchmark.json` from 8 to 40 questions
+- [x] Run `--check-support` at scale for real citation-support numbers
+- [x] Prepare and post a preprint with full results
+- [ ] Run the five defined single-component ablations to permit
+      component-level (rather than only three-baseline) attribution claims
 - [ ] Source real gold relevance labels for retrieval metrics
-- [ ] Run `--check-support` at scale for real citation-support numbers
 - [ ] Conduct human evaluation using `human_eval_schema()`
 - [ ] Add biomedical entity normalization (UMLS/MeSH linking)
 - [ ] Swap to a biomedical-domain embedding model (e.g. PubMedBERT)
 - [ ] Add full-text retrieval via the PMC Open Access subset
-- [ ] Submit results paper to arXiv
+- [ ] Submit to a peer-reviewed venue following preprint feedback
 
 ## 💸 Why $0 Cost
 
@@ -220,11 +238,19 @@ No paid plan, no credit card, anywhere in the stack — by design, so the system
 
 ## 📄 Citation
 
-A results paper is in preparation for arXiv once the benchmark run completes.
+If you use this code or cite these results, please cite the preprint
+(once posted, add its DOI/URL below) or, until then, the software itself:
 
 ```bibtex
-@software{biogenesis2026,
-  author = {Ayesha},
+@article{summaiyya2026biogenesis,
+  author = {Summaiyya, Mohammad Ayesha},
+  title  = {Grounding Before Generating: A Systems Evaluation of an Evidence-Aware Multi-Agent Pipeline for Biomedical Hypothesis Generation},
+  year   = {2026},
+  note   = {Preprint. [INSERT PREPRINTS.ORG DOI/URL ONCE POSTED]}
+}
+
+@software{biogenesis2026software,
+  author = {Summaiyya, Mohammad Ayesha},
   title  = {BioGenesis: An Evidence-Aware Multi-Agent Biomedical Research Assistant},
   year   = {2026},
   url    = {https://github.com/Ayesha037/biogenesis}
