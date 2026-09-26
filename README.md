@@ -243,14 +243,14 @@ If you use this code or cite these results, please cite the preprint
 
 ```bibtex
 @article{summaiyya2026biogenesis,
-  author = {Summaiyya, Mohammad Ayesha},
+  author = {Mohammad Ayesha Summaiyya},
   title  = {Grounding Before Generating: A Systems Evaluation of an Evidence-Aware Multi-Agent Pipeline for Biomedical Hypothesis Generation},
   year   = {2026},
   note   = {Preprint. [INSERT PREPRINTS.ORG DOI/URL ONCE POSTED]}
 }
 
 @software{biogenesis2026software,
-  author = {Summaiyya, Mohammad Ayesha},
+  author = {Mohammad Ayesha Summaiyya},
   title  = {BioGenesis: An Evidence-Aware Multi-Agent Biomedical Research Assistant},
   year   = {2026},
   url    = {https://github.com/Ayesha037/biogenesis}
