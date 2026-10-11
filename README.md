@@ -1,111 +1,112 @@
-# BioGenesis
+# BioGenesis 🧬
 
-**An evidence-aware, multi-agent system for biomedical hypothesis generation, built so that every design choice can be measured.**
+**A biomedical AI that has to show its evidence, built so that every design choice can be measured.**
 
-[![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
-[![Status](https://img.shields.io/badge/status-research%20prototype-yellow)](#current-status)
+![Status](https://img.shields.io/badge/status-research%20prototype-orange) ![License](https://img.shields.io/badge/license-MIT-blue)
 
-> **Research prototype. Not a clinical decision-support tool.** Outputs are literature-grounded suggestions for researchers to verify, not medical advice.
+> **Research prototype. Not a clinical tool.** Outputs are suggestions from the literature for researchers to check. They are not medical advice.
 
 ---
 
-## Why this project exists
+## The short version
 
-Most "chat with papers" tools stop at retrieval-augmented generation: fetch a few text chunks, put them in a prompt, and trust the model not to hallucinate. BioGenesis asks a narrower, testable question:
+Ask BioGenesis a research question and it searches PubMed, pulls out the evidence, builds hypotheses, and has to **cite real papers** for each one. Then a critic argues against it, and a checker looks at whether each cited paper really supports the claim.
 
-> Does adding explicit evidence structure (scored claims, a knowledge graph, an adversarial critic, citation checking) measurably improve the grounding and reliability of biomedical hypotheses compared with a plain LLM or standard RAG?
+I didn't just build it. I built a test harness around it, so I can switch each part on and off and see what actually helps. Some parts might turn out to help less than I hoped, and I'll publish that too.
 
-To answer it, the project ships a pipeline **and** an evaluation harness: 9 configurations (3 baselines, the full system, 5 ablations) share one code path, a 40-question benchmark, and metrics that are reported separately and never blended into one score.
+---
+
+## Why this exists
+
+Most "chat with papers" tools do the same thing: grab a few chunks of text, put them in a prompt, and hope the model doesn't make things up. BioGenesis asks a more specific question:
+
+> **Does adding structure to the evidence (scored claims, a knowledge graph, a critic, citation checking) make biomedical hypotheses more reliable than a plain LLM or standard RAG?**
+
+To find out, the project has a pipeline and an evaluation setup: **9 configurations** (3 baselines, the full system, 5 ablations) that share one code path, a **40-question benchmark**, and metrics that are reported separately and never mixed into one score.
+
+*(An "ablation" just means removing one part to see what changes.)*
+
+---
 
 ## What it does
 
-Given a research question, for example *"What evidence exists that metformin reduces colorectal cancer risk in people with type 2 diabetes?"*, BioGenesis:
+Say you ask: *"What evidence exists that metformin reduces colorectal cancer risk in people with type 2 diabetes?"*
 
-1. **Plans**: decomposes the question into sub-questions.
-2. **Retrieves**: searches PubMed for each sub-question.
-3. **Grounds**: chunks and embeds abstracts, then extracts structured evidence claims and scores them (study design hierarchy plus recency).
-4. **Links**: builds a knowledge graph of entities and claims, and surfaces contradictions.
-5. **Generates**: proposes hypotheses that must cite specific evidence items (PMIDs).
-6. **Critiques**: an adversarial agent reviews each hypothesis.
-7. **Verifies** (optional): checks whether each cited abstract actually supports the claim it is attached to.
-8. **Remembers**: stores hypotheses in a local SQLite memory for later questions.
-
-Every step in 1, 3, 4, 6 and 8 can be switched off with a single flag, so its contribution can be isolated.
-
-## Architecture
-
-```mermaid
-flowchart TD
-    Q[Research question] --> P[Planner<br/>use_planner]
-    P --> R[PubMed retrieval]
-    R --> E[Clean, chunk, embed, index]
-    E --> S[Semantic retrieval]
-    S --> EX[Evidence extraction and scoring<br/>use_evidence_scoring]
-    EX --> KG[Knowledge graph<br/>use_knowledge_graph]
-    EX --> MEM[Memory retrieval<br/>use_memory]
-    KG --> HG[Hypothesis generator<br/>must cite evidence IDs]
-    MEM --> HG
-    HG --> C[Critic<br/>use_critic]
-    C --> SC[Citation support check<br/>use_support_checking]
-    SC --> EV[Evaluation]
-    EV --> DB[(SQLite memory and graph JSON)]
+```
+Question → Planner → PubMed retrieval → Evidence scoring → Knowledge graph
+        → Hypotheses that must cite papers → Critic → Citation-support check → Memory
 ```
 
-The full system and every ablation run through the **same orchestrator**. There is no separate demo path. A test enforces that each ablation differs from `full_biogenesis` by exactly one flag.
+1. **Plan.** Break the question into smaller sub-questions.
+2. **Retrieve.** Search PubMed for each one.
+3. **Ground.** Split and embed the abstracts, pull out structured evidence claims, and score them (study design plus how recent).
+4. **Link.** Build a knowledge graph of entities and claims, and flag contradictions.
+5. **Generate.** Propose hypotheses that must cite specific papers (by PMID).
+6. **Critique.** A second agent argues against each hypothesis.
+7. **Verify (optional).** Check whether each cited abstract supports the claim it's attached to.
+8. **Remember.** Save hypotheses in a local SQLite memory for later questions.
 
-## Experimental design
+Steps 1, 3, 4, 6 and 8 each have a single on/off flag, so I can isolate what each one does. The full system and every ablation run through the same orchestrator. There's no special demo path, and a test checks that each ablation differs from `full_biogenesis` by exactly one flag.
+
+Design notes are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+---
+
+## The experiment
 
 | Config | Role | What it tests |
 |---|---|---|
-| `llm_only` | Baseline | No retrieval |
-| `standard_rag` | Baseline | Raw chunk retrieval, no evidence structure |
+| `llm_only` | Baseline | No retrieval at all |
+| `standard_rag` | Baseline | Raw text chunks, no evidence structure |
 | `evidence_aware_rag` | Baseline | Adds evidence extraction and scoring |
-| `full_biogenesis` | Full system | All components on |
-| `no_planner` | Ablation | Removes sub-question decomposition |
-| `no_evidence_scoring` | Ablation | Removes evidence scoring |
-| `no_knowledge_graph` | Ablation | Removes the knowledge graph |
-| `no_memory` | Ablation | Removes memory-augmented reasoning |
-| `no_critic` | Ablation | Removes the adversarial critic |
+| `full_biogenesis` | Full system | Everything on |
+| `no_planner` | Ablation | No sub-question breakdown |
+| `no_evidence_scoring` | Ablation | No evidence scoring |
+| `no_knowledge_graph` | Ablation | No knowledge graph |
+| `no_memory` | Ablation | No memory |
+| `no_critic` | Ablation | No critic |
 
-**Benchmark.** 40 questions, 8 categories of 5: drug-disease outcome, treatment outcome, gene-disease, biomarker-disease, drug adverse event, mechanism, association/risk, and conflicting evidence (`experiments/benchmark.json`). The benchmark contains questions only; no gold answers were invented.
+**Benchmark.** 40 questions in 8 categories of 5: drug-disease outcome, treatment outcome, gene-disease, biomarker-disease, drug adverse event, mechanism, association/risk, and conflicting evidence (`experiments/benchmark.json`). It contains questions only. I didn't invent gold answers.
 
-**Fixed settings.** Model `openai/gpt-oss-120b` via Groq, seed 42, PubMed via NCBI E-utilities, local `sentence-transformers` embeddings.
+**Fixed settings.** `openai/gpt-oss-120b` via Groq, seed 42, PubMed via NCBI E-utilities, local sentence-transformers embeddings.
 
 **Metrics, kept separate:**
+- **Automatic checks:** citation validity (are the cited PMIDs real and retrieved?), evidence coverage and diversity, contradiction rate, citation support rate.
+- **LLM-judged:** the critic's verdicts. This is a model's opinion, not ground truth.
+- **Human:** a rating template is ready (`human_eval_schema()`). I never generate fake ratings.
+- **Retrieval quality** (precision, recall, nDCG@k): only when gold PMIDs exist. Otherwise it's `None`, never a made-up zero.
 
-- **Automated (deterministic):** citation validity (are cited PMIDs real and retrieved), evidence coverage and diversity, contradiction rate, citation support rate.
-- **LLM-judged:** critic verdict distribution. This is model opinion, not ground truth.
-- **Human:** a rating template (`human_eval_schema()`); no ratings are ever generated.
-- **Retrieval:** precision, recall and nDCG@k, only when gold PMIDs exist; otherwise `None`, never a fake zero.
+---
 
-## Current status
+## Where things stand
 
-*Last updated: [DATE]. Update this section after every run.*
+*Last updated: 11 October 2026. I update this after every run.*
 
-| Config | Completed items (status ok) | Items with at least one hypothesis | Notes |
-|---|---:|---:|---|
-| `llm_only` | 40 / 40 | n/a | Answer-level judging not yet done |
-| `standard_rag` | 40 / 40 | n/a | Answer-level judging not yet done |
-| `evidence_aware_rag` | 40 / 40 | n/a | Free-tier rate limits required many retries |
-| `full_biogenesis` | 40 / 40 | 27 / 40 | See preliminary metrics below |
-| `no_planner` | 31 / 40 | 16 / 40 | Partial; 9 items outstanding |
-| `no_evidence_scoring`, `no_knowledge_graph`, `no_memory`, `no_critic` | not yet run | | |
+| Config | Runs finished | Runs with at least one hypothesis | Notes |
+|---|---|---|---|
+| `llm_only` | 40 / 40 | n/a | Answer-level judging not done yet |
+| `standard_rag` | 40 / 40 | n/a | Answer-level judging not done yet |
+| `evidence_aware_rag` | 40 / 40 | n/a | Free-tier rate limits caused many retries |
+| `full_biogenesis` | 40 / 40 | 27 / 40 | See early numbers below |
+| `no_planner` | 31 / 40 | 16 / 40 | Partial, 9 questions left |
+| `no_evidence_scoring`, `no_knowledge_graph`, `no_memory`, `no_critic` | not run yet | | |
 
-"Completed" means the pipeline returned without error. It does not mean the output was useful: some completed runs retrieved no papers or produced no hypotheses, which is why the second column is reported.
+"Finished" means the pipeline ran without crashing. It does **not** mean the output was good. Some finished runs found no papers or produced no hypotheses, which is why the second column exists.
 
-### Preliminary metrics (`full_biogenesis`, 27 questions with hypotheses)
+### Early numbers (`full_biogenesis`, the 27 questions that produced hypotheses)
 
-| Metric | Value |
-|---|---:|
-| Citation validity | 1.00 |
-| Citation support rate | 0.60 |
-| Contradiction rate | 0.04 |
-| Evidence items per question (mean) | 14.3 |
+| Metric | Value | In plain words |
+|---|---|---|
+| Citation validity | 1.00 | Every cited paper was real and had been retrieved |
+| Citation support rate | 0.60 | About 6 in 10 cited papers backed up the claim they were attached to |
+| Contradiction rate | 0.04 | Few contradictions were flagged between evidence items |
+| Evidence items per question | 14.3 (mean) | |
 
-These numbers are **preliminary**. They come from runs spread across several code revisions and will be recomputed from a single final run. Critic approval is deliberately not headlined: most verdicts are "needs caveats", which the metric counts as approval, so it carries little information.
+These are **early** numbers. They come from runs across several code versions, and I'll recompute them from one clean final run. I'm not highlighting critic approval, because most verdicts are "needs caveats", which the metric counts as approval, so it tells us very little.
 
-> No claim of superiority over the baselines is made until all configurations are re-run on the same code version and compared on the same set of questions.
+**I'm not claiming BioGenesis beats the baselines.** I'll only compare once every configuration has been re-run on the same code version and the same questions.
+
+---
 
 ## Quickstart
 
@@ -117,13 +118,13 @@ pip install -r requirements.txt && pip install -e .
 cp .env.example .env     # then add your keys
 ```
 
-| Variable | Source | Required |
+| Variable | Where to get it | Needed? |
 |---|---|---|
-| `GROQ_API_KEY` | [console.groq.com/keys](https://console.groq.com/keys) (free tier) | Yes |
+| `GROQ_API_KEY` | console.groq.com/keys (free tier) | Yes |
 | `NCBI_EMAIL` | Your email (NCBI usage policy) | Recommended |
-| `NCBI_API_KEY` | [NCBI account settings](https://www.ncbi.nlm.nih.gov/account/) | Optional (raises rate limit) |
+| `NCBI_API_KEY` | NCBI account settings | Optional (higher rate limit) |
 
-Never commit `.env`. It is gitignored, but also exclude it when zipping or sharing the project.
+Never commit `.env`. It's gitignored, but leave it out when you zip or share the project too.
 
 **Run one question:**
 
@@ -141,15 +142,17 @@ python experiments/runner.py --config standard_rag --benchmark experiments/bench
 python experiments/runner.py --config full_biogenesis --benchmark experiments/benchmark.json --check-support
 ```
 
-Results are written as JSONL to `experiments/results/`. Failures are stored as `status="error"` records with the traceback, never hidden or replaced with fake output.
+Results go to `experiments/results/` as JSONL. Failures are saved as `status="error"` records with the traceback. They're never hidden or replaced with fake output.
 
-**Run the tests** (no API key needed; all external calls are faked):
+**Run the tests** (no API key needed, all external calls are faked):
 
 ```bash
 pytest tests/
 ```
 
-## Repository layout
+---
+
+## Repo layout
 
 ```
 biogenesis/
@@ -162,35 +165,41 @@ biogenesis/
 │   ├── knowledge_graph/  NetworkX graph builder
 │   ├── agents/           planner, hypothesis generator, critic
 │   ├── orchestration/    pipeline wiring and ablation flags
-│   ├── evaluation/       automated, LLM-judged and human metrics
+│   ├── evaluation/       automatic, LLM-judged and human metrics
 │   └── memory/           SQLite memory and retrieval
 ├── experiments/          benchmark, 9 configs, baselines, runner
 ├── tests/                offline unit tests
-├── docs/ARCHITECTURE.md  design rationale
+├── docs/ARCHITECTURE.md  design notes
 └── pipeline.py           single-question entry point
 ```
 
-## Known limitations
+---
 
-- **Free-tier infrastructure.** Rate limits caused many retries and some failed runs. Results are only as consistent as the final re-run.
-- **Retrieval failures.** Some questions return no PubMed results, and without the planner the raw question is often a poor search query.
-- **Heuristic evidence scoring.** Study-type hierarchy plus recency decay; not a validated model.
-- **Naive entity resolution.** "Metformin" and "metformin hydrochloride" are separate graph nodes. Normalisation (UMLS/MeSH) is future work.
-- **Contradictions are surfaced, not adjudicated.**
-- **Memory is keyword-based and shared across questions in a run**, which can leak earlier hypotheses into later ones. The final comparison isolates memory per question.
-- **LLM judging is not ground truth.** Human evaluation is still to be done.
+## What doesn't work well yet
+
+- **Free-tier limits.** Rate limits caused many retries and some failed runs. The results will only be as consistent as my final re-run.
+- **Retrieval failures.** Some questions return no PubMed results. Without the planner, the raw question is often a poor search query.
+- **Rough evidence scoring.** It uses study type plus recency decay. It isn't a validated model.
+- **Simple entity matching.** "Metformin" and "metformin hydrochloride" become separate graph nodes. Proper normalisation (UMLS/MeSH) is future work.
+- **Contradictions are flagged, not resolved.**
+- **Memory can leak.** It's keyword-based and shared across questions in one run, so earlier hypotheses can bleed into later ones. The final comparison will isolate memory per question.
+- **LLM judging isn't ground truth**, and human evaluation isn't done yet.
 - **Abstracts only.** No full-text retrieval.
+
+---
 
 ## Roadmap
 
-- [ ] Fix empty-hypothesis failure paths (generator JSON retry, planner-off search fallback)
-- [ ] Re-run all configurations on one commit with per-question memory isolation
-- [ ] Add an answer-level judge for the baselines and a human-rated subsample
+- [ ] Fix the empty-hypothesis failures (generator JSON retry, search fallback when the planner is off)
+- [ ] Re-run every configuration on one commit, with memory isolated per question
+- [ ] Add an answer-level judge for the baselines and a human-rated sample
 - [ ] Paired comparison with bootstrap confidence intervals, plus per-category results
 - [ ] Biomedical entity normalisation and a biomedical embedding model
 - [ ] Short technical report (Zenodo / arXiv)
 
-## Citation
+---
+
+## Cite this
 
 ```bibtex
 @software{summaiyya2026biogenesis,
